@@ -1,15 +1,15 @@
 {
   "name": "pc-dynamic-island",
   "version": "1.0.0",
-  "main": "main.js",
+  "description": "A macOS-style Dynamic Island for Windows, built with Electron.",
+  "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "rebuild": "electron-rebuild"
   },
-  "keywords": [],
+  "keywords": ["dynamic-island", "electron", "windows", "desktop"],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "electron": "^38.1.2",
     "electron-rebuild": "^3.2.9"

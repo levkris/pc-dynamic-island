@@ -1,2 +1,6 @@
 /node_modules
+/dist
+data/prompts.json
+data/seen_notifications.json
+.env
 /cabai
