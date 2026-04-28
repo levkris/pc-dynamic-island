@@ -4,6 +4,7 @@ const fs = require('fs')
 
 const ISLAND_WIDTH = 400
 const ISLAND_HEIGHT = 140
+const PEEK_HEIGHT = 4
 
 let aiWindow = null
 let animationInterval = null
@@ -20,7 +21,7 @@ function createIslandWindow() {
         skipTaskbar: true,
         hasShadow: false,
         x: Math.round((width - ISLAND_WIDTH) / 2),
-        y: 1 - ISLAND_HEIGHT,
+        y: -(ISLAND_HEIGHT - PEEK_HEIGHT),
         alwaysOnTop: true,
         resizable: false,
         fullscreenable: false,
@@ -83,7 +84,7 @@ function slideDown(win) {
 
 function slideUp(win) {
     if (!win) return
-    animateTo(win, 1 - win.getBounds().height)
+    animateTo(win, -(ISLAND_HEIGHT - PEEK_HEIGHT))
 }
 
 function openAiWindow() {
@@ -139,7 +140,7 @@ function collapseIsland(win) {
         const { width } = screen.getPrimaryDisplay().workAreaSize
         win.setBounds({
             x: Math.round((width - ISLAND_WIDTH) / 2),
-            y: 0,
+            y: -(ISLAND_HEIGHT - PEEK_HEIGHT),
             width: ISLAND_WIDTH,
             height: ISLAND_HEIGHT
         })
