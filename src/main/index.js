@@ -2,6 +2,9 @@ const { app, BrowserWindow, globalShortcut } = require('electron')
 const { createIslandWindow, openAiWindow } = require('./windows')
 const { registerIpcHandlers } = require('./ipc')
 const { startNotificationBridge, stopNotificationBridge } = require('./notifications')
+const { patchConsole, toggleDevConsole } = require('./devConsole')
+
+patchConsole()
 
 let islandWindow = null
 
@@ -10,6 +13,9 @@ app.whenReady().then(() => {
     registerIpcHandlers(islandWindow)
 
     globalShortcut.register('Alt+Enter', () => openAiWindow())
+    globalShortcut.register('Control+Shift+D', () => toggleDevConsole())
+
+    console.log('[main] App ready')
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -17,6 +23,7 @@ app.whenReady().then(() => {
             registerIpcHandlers(islandWindow)
         }
     })
+
     startNotificationBridge((notif) => {
         if (notif.kind === 'added') islandWindow.webContents.send('notification', notif)
     })

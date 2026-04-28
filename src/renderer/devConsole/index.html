@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dev Console</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d0d0d;
+            --surface: #141414;
+            --border: #222;
+            --log:   #c8c8c8;
+            --info:  #5b9bd5;
+            --warn:  #d4a34a;
+            --error: #d45b5b;
+            --time:  #444;
+            --tag-log:   #2a2a2a;
+            --tag-info:  #1a2d40;
+            --tag-warn:  #332610;
+            --tag-error: #331515;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--log);
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 12px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 11px;
+            font-weight: 500;
+            color: #555;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 4px;
+        }
+
+        .filter-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: #555;
+            font-family: inherit;
+            font-size: 10px;
+            padding: 2px 8px;
+            cursor: pointer;
+            transition: all 0.1s;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-btn.active-log   { border-color: #3a3a3a; color: var(--log);   background: var(--tag-log); }
+        .filter-btn.active-info  { border-color: #1e3d5c; color: var(--info);  background: var(--tag-info); }
+        .filter-btn.active-warn  { border-color: #4a3518; color: var(--warn);  background: var(--tag-warn); }
+        .filter-btn.active-error { border-color: #4a1a1a; color: var(--error); background: var(--tag-error); }
+        .filter-btn:hover { border-color: #444; color: #888; }
+
+        .btn-clear {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: #444;
+            font-family: inherit;
+            font-size: 10px;
+            padding: 2px 8px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .btn-clear:hover { border-color: #555; color: #888; }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        #search {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--log);
+            font-family: inherit;
+            font-size: 11px;
+            padding: 3px 8px;
+            outline: none;
+            width: 160px;
+            transition: border-color 0.1s;
+        }
+        #search:focus { border-color: #444; }
+        #search::placeholder { color: #333; }
+
+        #count {
+            font-size: 10px;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        #log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #222 transparent;
+        }
+
+        .entry {
+            display: flex;
+            align-items: baseline;
+            gap: 0;
+            padding: 2px 14px;
+            line-height: 1.6;
+            border-left: 2px solid transparent;
+            transition: background 0.05s;
+        }
+        .entry:hover { background: rgba(255,255,255,0.025); }
+
+        .entry.level-warn  { border-left-color: var(--warn); }
+        .entry.level-error { border-left-color: var(--error); }
+        .entry.level-info  { border-left-color: var(--info); }
+
+        .entry-time {
+            color: var(--time);
+            min-width: 68px;
+            font-size: 10px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .entry-level {
+            font-size: 9px;
+            font-weight: 500;
+            min-width: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .level-log   .entry-level { color: #333; }
+        .level-info  .entry-level { color: var(--info); }
+        .level-warn  .entry-level { color: var(--warn); }
+        .level-error .entry-level { color: var(--error); }
+
+        .entry-msg {
+            white-space: pre-wrap;
+            word-break: break-all;
+            flex: 1;
+            color: var(--log);
+        }
+        .level-info  .entry-msg { color: #8ab4d8; }
+        .level-warn  .entry-msg { color: #c49a46; }
+        .level-error .entry-msg { color: #c45b5b; }
+
+        .entry.hidden { display: none; }
+
+        #empty {
+            display: none;
+            color: #2a2a2a;
+            text-align: center;
+            margin-top: 80px;
+            font-size: 13px;
+        }
+
+        footer {
+            padding: 5px 14px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .auto-scroll-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #444;
+            font-size: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .auto-scroll-label input { cursor: pointer; accent-color: #555; }
+
+        .shortcut-hint {
+            margin-left: auto;
+            font-size: 10px;
+            color: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="title">Dev Console</span>
+        <div class="controls">
+            <div class="filter-bar">
+                <button class="filter-btn active-log"   data-level="log">LOG</button>
+                <button class="filter-btn active-info"  data-level="info">INFO</button>
+                <button class="filter-btn active-warn"  data-level="warn">WARN</button>
+                <button class="filter-btn active-error" data-level="error">ERR</button>
+            </div>
+            <input id="search" type="text" placeholder="filter…" autocomplete="off">
+            <button class="btn-clear" id="btn-clear">CLEAR</button>
+            <span id="count">0 entries</span>
+        </div>
+    </header>
+    <div id="log"></div>
+    <div id="empty">No log entries yet.</div>
+    <footer>
+        <label class="auto-scroll-label">
+            <input type="checkbox" id="auto-scroll" checked>
+            Auto-scroll
+        </label>
+        <span class="shortcut-hint">Ctrl+Shift+D to toggle</span>
+    </footer>
+    <script src="index.js"></script>
+</body>
+</html>
